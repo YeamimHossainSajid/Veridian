@@ -1,0 +1,12 @@
+eureka:
+  client:
+    enabled: false
+
+veridian:
+  jwt:
+    secret: test-secret-key-at-least-256-bits-for-hs256-algorithm-required-here
+
+spring:
+  cloud:
+    gateway:
+      routes: []

@@ -1,0 +1,76 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      routes:
+        # Order Service (BFF: requires JWT + rate limit)
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/api/orders/**
+          filters:
+            - name: JwtAuthentication
+            - name: RateLimit
+              args:
+                capacity: 200
+                refillPerSecond: 100
+            - StripPrefix=1
+        # User / Auth (public)
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/auth/**,/api/users/**
+          filters:
+            - StripPrefix=1
+        # Actuator passthrough handled by gateway itself
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+        cors-configurations:
+          "[/**]":
+            allowedOrigins: "*"
+            allowedMethods: GET,POST,PUT,DELETE,PATCH,OPTIONS
+            allowedHeaders: "*"
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URI:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+
+veridian:
+  jwt:
+    secret: ${JWT_SECRET:VeridianGatewaySecretKeyForJwtSigningMustBeAtLeast256BitsLong}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,gateway
+  endpoint:
+    health:
+      show-details: when-authorized
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+logging:
+  level:
+    root: INFO
+    com.veridian.apigateway: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
