@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package com.veridian.proto.order;
+
+option java_multiple_files = true;
+option java_package = "com.veridian.proto.order";
+option java_outer_classname = "OrderServiceProto";
+
+enum OrderSideProto {
+  BUY = 0;
+  SELL = 1;
+}
+
+enum OrderTypeProto {
+  LIMIT = 0;
+  MARKET = 1;
+  STOP_LOSS = 2;
+  STOP_LIMIT = 3;
+}
+
+enum OrderStatusProto {
+  PENDING_RISK = 0;
+  ACCEPTED = 1;
+  REJECTED = 2;
+  ROUTED = 3;
+  PARTIAL = 4;
+  FILLED = 5;
+  CANCELLED = 6;
+}
+
+message PlaceOrderRequest {
+  string account_id = 1;
+  string symbol = 2;
+  OrderSideProto side = 3;
+  OrderTypeProto order_type = 4;
+  string price = 5;
+  string quantity = 6;
+  string time_in_force = 7;
+}
+
+message PlaceOrderResponse {
+  string order_id = 1;
+  OrderStatusProto status = 2;
+  string message = 3;
+  int64 timestamp_epoch_ms = 4;
+}
+
+message CancelOrderRequest {
+  string order_id = 1;
+  string account_id = 2;
+  string symbol = 3;
+}
+
+message CancelOrderResponse {
+  string order_id = 1;
+  bool success = 2;
+  string reason = 3;
+}
+
+message GetOrderStatusRequest {
+  string order_id = 1;
+}
+
+message OrderDetailResponse {
+  string order_id = 1;
+  string account_id = 2;
+  string symbol = 3;
+  OrderSideProto side = 4;
+  string price = 5;
+  string original_quantity = 6;
+  string executed_quantity = 7;
+  OrderStatusProto status = 8;
+  int64 created_at = 9;
+}
+
+service OrderRpcService {
+  rpc PlaceOrder (PlaceOrderRequest) returns (PlaceOrderResponse);
+  rpc CancelOrder (CancelOrderRequest) returns (CancelOrderResponse);
+  rpc GetOrderStatus (GetOrderStatusRequest) returns (OrderDetailResponse);
+}

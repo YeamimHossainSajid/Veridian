@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package com.veridian.proto.marketdata;
+
+option java_multiple_files = true;
+option java_package = "com.veridian.proto.marketdata";
+option java_outer_classname = "MarketDataProto";
+
+message PriceLevelProto {
+  string price = 1;
+  string quantity = 2;
+  int32 order_count = 3;
+}
+
+message MarketDepthProto {
+  string symbol = 1;
+  int64 timestamp = 2;
+  int64 sequence_number = 3;
+  repeated PriceLevelProto bids = 4;
+  repeated PriceLevelProto asks = 5;
+}
+
+message MarketTickProto {
+  string symbol = 1;
+  string last_price = 2;
+  string last_quantity = 3;
+  string vwap = 4;
+  string high_24h = 5;
+  string low_24h = 6;
+  string volume_24h = 7;
+  int64 timestamp = 8;
+}
+
+message SubscribeMarketDataRequest {
+  string symbol = 1;
+  string subscription_type = 2; // DEPTH, TICK, TRADES
+}
+
+service MarketDataRpcService {
+  rpc StreamMarketDepth (SubscribeMarketDataRequest) returns (stream MarketDepthProto);
+  rpc StreamTicks (SubscribeMarketDataRequest) returns (stream MarketTickProto);
+}
