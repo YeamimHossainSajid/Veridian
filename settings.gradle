@@ -1,0 +1,13 @@
+rootProject.name = 'veridian'
+
+include 'common-lib'
+include 'api-gateway'
+include 'service-registry'
+include 'order-service'
+include 'matching-engine'
+include 'risk-engine'
+include 'market-data-service'
+include 'payment-service'
+include 'custody-service'
+include 'settlement-service'
+include 'analytics-service'
