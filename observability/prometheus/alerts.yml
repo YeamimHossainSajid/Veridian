@@ -1,0 +1,29 @@
+groups:
+  - name: veridian_hft_alerts
+    rules:
+      - alert: HighMatchingLatency
+        expr: histogram_quantile(0.99, rate(matching_engine_execution_latency_seconds_bucket[1m])) > 0.001
+        for: 10s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Matching Engine P99 latency exceeded 1 millisecond"
+          description: "P99 latency is currently {{ $value }}s on instance {{ $labels.instance }}"
+
+      - alert: CircuitBreakerTripped
+        expr: veridian_circuit_breaker_active == 1
+        for: 0s
+        labels:
+          severity: page
+        annotations:
+          summary: "Trading Circuit Breaker Tripped"
+          description: "Circuit breaker is active for symbol {{ $labels.symbol }}"
+
+      - alert: KafkaConsumerLagHigh
+        expr: kafka_consumergroup_lag{topic="order-events"} > 5000
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "Order events processing lag high"
+          description: "Kafka consumer lag is {{ $value }} on topic order-events"

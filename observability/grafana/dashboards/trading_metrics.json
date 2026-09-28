@@ -1,0 +1,53 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 1,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "title": "Throughput (Trades / Second)",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(matching_engine_trades_total[1s]))",
+          "legendFormat": "Trades/sec"
+        }
+      ]
+    },
+    {
+      "title": "P99 Execution Latency",
+      "type": "gauge",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 0 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, rate(matching_engine_execution_latency_seconds_bucket[10s])) * 1000",
+          "legendFormat": "P99 (ms)"
+        }
+      ]
+    },
+    {
+      "title": "Kafka Consumer Lag",
+      "type": "timeseries",
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(kafka_consumergroup_lag) by (topic)",
+          "legendFormat": "{{ topic }}"
+        }
+      ]
+    }
+  ],
+  "refresh": "1s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["veridian", "trading", "hft"],
+  "time": { "from": "now-15m", "to": "now" },
+  "timepicker": {},
+  "timezone": "utc",
+  "title": "Veridian HFT Command Center",
+  "version": 1
+}

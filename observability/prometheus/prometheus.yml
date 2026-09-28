@@ -1,0 +1,37 @@
+global:
+  scrape_interval: 1s
+  evaluation_interval: 1s
+
+rule_files:
+  - "alerts.yml"
+
+scrape_configs:
+  - job_name: 'api-gateway'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['api-gateway:8080']
+
+  - job_name: 'order-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['order-service:8081']
+
+  - job_name: 'matching-engine'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['matching-engine:8082']
+
+  - job_name: 'risk-engine'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['risk-engine:8083']
+
+  - job_name: 'market-data-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['market-data-service:8084']
+
+  - job_name: 'analytics-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['analytics-service:8088']
