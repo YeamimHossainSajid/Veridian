@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: risk-engine
+  namespace: veridian-prod
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: risk-engine
+  template:
+    metadata:
+      labels:
+        app: risk-engine
+    spec:
+      containers:
+        - name: risk-engine
+          image: veridian/risk-engine:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8083
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1000m"
+            limits:
+              memory: "4Gi"
+              cpu: "4000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: risk-engine
+  namespace: veridian-prod
+spec:
+  type: ClusterIP
+  selector:
+    app: risk-engine
+  ports:
+    - port: 8083
+      targetPort: 8083

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: veridian-common-config
+  namespace: veridian-prod
+data:
+  KAFKA_BOOTSTRAP_SERVERS: "kafka.veridian-prod.svc.cluster.local:9092"
+  REDIS_HOST: "redis.veridian-prod.svc.cluster.local"
+  REDIS_PORT: "6379"
+  CLICKHOUSE_HOST: "clickhouse.veridian-prod.svc.cluster.local"
+  CLICKHOUSE_PORT: "8123"
+  JVM_OPTS: "-XX:+UseZGC -XX:+AlwaysPreTouch -XX:MaxGCPauseMillis=5"

@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: veridian-prod
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+    spec:
+      containers:
+        - name: order-service
+          image: veridian/order-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8081
+          envFrom:
+            - configMapRef:
+                name: veridian-common-config
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "1000m"
+            limits:
+              memory: "4Gi"
+              cpu: "4000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+  namespace: veridian-prod
+spec:
+  type: ClusterIP
+  selector:
+    app: order-service
+  ports:
+    - port: 8081
+      targetPort: 8081

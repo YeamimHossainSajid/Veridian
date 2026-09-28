@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: matching-engine
+  namespace: veridian-prod
+spec:
+  replicas: 1 # Single writer partitioned by symbol
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: matching-engine
+  template:
+    metadata:
+      labels:
+        app: matching-engine
+    spec:
+      containers:
+        - name: matching-engine
+          image: veridian/matching-engine:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8082
+          resources:
+            requests:
+              memory: "4Gi"
+              cpu: "4000m"
+            limits:
+              memory: "8Gi"
+              cpu: "8000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: matching-engine
+  namespace: veridian-prod
+spec:
+  type: ClusterIP
+  selector:
+    app: matching-engine
+  ports:
+    - port: 8082
+      targetPort: 8082
