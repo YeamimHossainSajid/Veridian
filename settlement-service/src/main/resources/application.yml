@@ -1,0 +1,27 @@
+server:
+  port: 8087
+
+spring:
+  application:
+    name: settlement-service
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/veridian_settlement}
+    username: ${SPRING_DATASOURCE_USERNAME:veridian}
+    password: ${SPRING_DATASOURCE_PASSWORD:veridian_secret}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+veridian:
+  settlement:
+    cycle: T_PLUS_ZERO # Real-time atomic clearing
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
