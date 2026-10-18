@@ -3,6 +3,7 @@ package com.veridian.orderservice.dto;
 import com.veridian.common.domain.OrderSide;
 import com.veridian.common.domain.OrderType;
 import com.veridian.common.domain.TimeInForce;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -30,6 +31,7 @@ public class CreateOrderRequest {
     @DecimalMin(value = "0.0001", message = "Quantity must be positive")
     private BigDecimal quantity;
 
+    @NotNull(message = "Time in force is required")
     private TimeInForce timeInForce = TimeInForce.GTC;
 
     public CreateOrderRequest() {}
@@ -44,6 +46,14 @@ public class CreateOrderRequest {
         this.price = price;
         this.quantity = quantity;
         this.timeInForce = timeInForce != null ? timeInForce : TimeInForce.GTC;
+    }
+
+    @AssertTrue(message = "Price is required and must be positive for LIMIT and STOP_LIMIT orders")
+    public boolean isPriceValidForOrderType() {
+        if (orderType == OrderType.LIMIT || orderType == OrderType.STOP_LIMIT) {
+            return price != null && price.compareTo(BigDecimal.ZERO) > 0;
+        }
+        return true;
     }
 
     public String getAccountId() { return accountId; }
