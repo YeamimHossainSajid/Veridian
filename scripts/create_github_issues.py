@@ -4,6 +4,9 @@ import re
 import os
 import subprocess
 import time
+import json
+import urllib.request
+import urllib.error
 
 def parse_catalog(filepath):
     issues = []
@@ -49,6 +52,10 @@ def parse_catalog(filepath):
 
     return issues
 
+def get_token():
+    res = subprocess.run(["gh", "auth", "token"], capture_output=True, text=True, check=True)
+    return res.stdout.strip()
+
 def main():
     mode = "--dry-run"
     if len(sys.argv) > 1 and sys.argv[1] == "--live":
@@ -60,34 +67,77 @@ def main():
     issues = parse_catalog(cat1) + parse_catalog(cat2)
     print("=" * 65)
     print(f" Veridian Issue Creator - Mode: {mode}")
-    print(f" Total Issues Parsed: {len(issues)}")
+    print(f" Total Issues to Process: {len(issues)}")
     print("=" * 65)
 
+    if mode != "--live":
+        for issue in issues:
+            print(f"[DRY-RUN] #{issue['number']:03d}: {issue['title']} [{', '.join(issue['labels'])}]")
+        print("=" * 65)
+        print(" Dry run complete. Run with --live to push to GitHub.")
+        print("=" * 65)
+        return
+
+    token = get_token()
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "Veridian-Issue-Creator"
+    }
+
+    url = "https://api.github.com/repos/YeamimHossainSajid/Veridian/issues"
+
+    created_count = 0
     for issue in issues:
         num = issue["number"]
         title = issue["title"]
         service = issue["service"]
-        labels = ",".join(issue["labels"])
+        labels = issue["labels"]
         desc = issue["description"]
         ac = issue["acceptance_criteria"]
 
-        body = f"## Service\n`{service}`\n\n## Description\n{desc}\n\n## Acceptance Criteria\n{ac}\n"
+        body = (
+            f"### Service\n`{service}`\n\n"
+            f"### Description\n{desc}\n\n"
+            f"### Acceptance Criteria\n{ac}\n\n"
+            f"---\n*Part of the Veridian High-Frequency Trading Architecture Roadmap.*"
+        )
 
-        if mode == "--live":
-            print(f"Creating issue #{num}: {title}...")
-            cmd = ["gh", "issue", "create", "--title", title, "--body", body]
-            if labels:
-                cmd.extend(["--label", labels])
+        payload = json.dumps({
+            "title": f"#{num}: {title}",
+            "body": body,
+            "labels": labels
+        }).encode("utf-8")
+
+        success = False
+        attempts = 0
+        while not success and attempts < 5:
+            attempts += 1
             try:
-                subprocess.run(cmd, check=True)
-                time.sleep(1) # rate limiting protection
-            except Exception as e:
-                print(f"Failed to create #{num}: {e}")
-        else:
-            print(f"[DRY-RUN] #{num:03d}: {title} [{labels}]")
+                req = urllib.request.Request(url, data=payload, headers=headers, method="POST")
+                with urllib.request.urlopen(req) as resp:
+                    resp_data = json.loads(resp.read().decode())
+                    gh_num = resp_data.get("number")
+                    gh_url = resp_data.get("html_url")
+                    print(f"✓ [{num:03d}/200] Created GitHub Issue #{gh_num}: {title} -> {gh_url}", flush=True)
+                    created_count += 1
+                    success = True
+                # Delay to prevent secondary rate limiting
+                time.sleep(1.0)
+            except urllib.error.HTTPError as e:
+                err_body = e.read().decode()
+                if e.code == 403 and "secondary rate limit" in err_body.lower():
+                    print(f"⚠ Hit secondary rate limit on #{num}. Waiting 40s before retry...", flush=True)
+                    time.sleep(40)
+                else:
+                    print(f"✗ Failed to create #{num} (HTTP {e.code}): {err_body}", flush=True)
+                    time.sleep(2)
+            except Exception as ex:
+                print(f"✗ Network error on #{num}: {ex}. Retrying in 5s...", flush=True)
+                time.sleep(5)
 
     print("=" * 65)
-    print(f" Completed processing {len(issues)} issues.")
+    print(f" Completed! Created {created_count} issues on GitHub.")
     print("=" * 65)
 
 if __name__ == "__main__":
