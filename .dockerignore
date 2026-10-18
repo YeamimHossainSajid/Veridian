@@ -1,0 +1,13 @@
+.git
+.gitignore
+.gradle
+build/classes
+build/generated
+build/reports
+build/test-results
+build/tmp
+*.log
+.idea
+*.iml
+.vscode
+.DS_Store
