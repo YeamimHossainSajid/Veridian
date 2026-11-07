@@ -37,7 +37,7 @@ flowchart TB
     %% =============================
     %% BFF LAYER
     %% =============================
-    subgraph BFF_LAYER ["Backend For Frontend"]
+    subgraph BFF_LAYER ["Backend-for-Frontend"]
         C1["Mobile BFF<br/>GraphQL<br/>Push Notifications"]
         C2["Web BFF<br/>Trading Terminal<br/>Charts"]
         C3["Bank BFF<br/>SOAP / FIX<br/>Batch Processing"]
@@ -83,7 +83,7 @@ flowchart TB
     %% EVENT STREAM
     %% =============================
     subgraph STREAMING ["Event Streaming Core (Kafka + Pulsar)"]
-        F["order-events<br/>market-data<br/>risk-alerts<br/>audit-trail<br/>DLQ<br/><br/>Exactly Once"]
+        F["order-events<br/>market-data<br/>risk-alerts<br/>audit-trail<br/>DLQ<br/><br/>Exactly-once"]
     end
 
     E1 --> F
@@ -358,7 +358,7 @@ Tracked Metrics:
 
 # Testing & Chaos Engineering
 
-- TestContainers (Integration)  
+- Testcontainers (Integration)  
 - Pact (Contract Testing)  
 - Gatling (Load Testing)  
 - Chaos Mesh (Failure Injection)  
@@ -376,7 +376,7 @@ Tracked Metrics:
 # Trading Scenarios
 
 ##  High-Frequency Arbitrage
-- Detect cross-exchange discrepancy (<100μs)
+- Detect cross-exchange discrepancies (<100 μs)
 - Hedge execution
 - Atomic risk-controlled execution
 
